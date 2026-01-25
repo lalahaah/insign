@@ -1,0 +1,69 @@
+/**
+ * InSign AI Analysis Engine - Prompt Design
+ * 모델: gpt-4o-2024-08-06 (Structured Output 지원 모델)
+ */
+
+// 1. 시스템 프롬프트 (System Prompt)
+const SYSTEM_PROMPT = `
+당신은 한국 내 외국인 엔터테인먼트 종사자 및 프리랜서를 보호하는 'InSign' 서비스의 법률 분석 전문가입니다.
+사용자가 제공하는 한국어 계약서를 분석하여 '대중문화예술인 표준전속계약서'와 비교 분석 리포트를 작성하십시오.
+
+[분석 지침]
+1. 객관성: 표준 계약서 조항과 명백히 다르거나 아티스트에게 일방적으로 불리한 조항을 찾으십시오.
+2. 다국어 제공: title과 explanation은 영어(en)로, negotiation_script는 한국어(ko)로 작성하십시오.
+3. 협상 코칭: 한국어 수정 요청 문구는 매우 정중하지만(존댓말) 논리적인 비즈니스 톤을 유지하십시오.
+4. 비자 영향: 계약 내용이 외국인의 체류 자격(E-6 등) 유지에 해가 될 요소(최저 정산금 미달 등)가 있는지 확인하십시오.
+
+[출력 형식]
+반드시 제공된 JSON 스키마를 엄격히 준수하여 응답하십시오.
+`;
+
+// 2. 응답 스키마 정의 (OpenAI Structured Output용)
+const RESPONSE_SCHEMA = {
+  type: "object",
+  properties: {
+    overallScore: { type: "number", description: "계약 안전 점수 (0-100)" },
+    summary: { type: "string", description: "전체 분석 요약 (영어)" },
+    toxicClauses: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "number" },
+          title_ko: { type: "string" },
+          title_en: { type: "string" },
+          severity: { enum: ["high", "medium", "low"] },
+          original_text: { type: "string", description: "문제가 된 원문 조항" },
+          standard_reference: { type: "string", description: "근거가 되는 표준 계약서 조항 번호" },
+          explanation_en: { type: "string", description: "왜 위험한지 외국인에게 설명" },
+          negotiation_script_ko: { type: "string", description: "에이전시에 보낼 한국어 수정 요청 문구" },
+          isFreeSample: { type: "boolean", description: "가장 치명적인 1개 항목에 true 설정" }
+        },
+        required: ["id", "title_ko", "title_en", "severity", "original_text", "explanation_en", "negotiation_script_ko", "isFreeSample"]
+      }
+    },
+    visaImpact: {
+      type: "object",
+      properties: {
+        status: { enum: ["safe", "warning", "danger"] },
+        reason_en: { type: "string" }
+      },
+      required: ["status", "reason_en"]
+    }
+  },
+  required: ["overallScore", "summary", "toxicClauses", "visaImpact"]
+};
+
+// 3. API 호출 예시 (Firebase Function 내 구현)
+async function analyzeContract(contractText) {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-2024-08-06",
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: `다음 계약서를 분석해줘: \n\n ${contractText}` }
+    ],
+    response_format: { type: "json_schema", json_schema: { name: "analysis_report", schema: RESPONSE_SCHEMA } }
+  });
+
+  return JSON.parse(response.choices[0].message.content);
+}
