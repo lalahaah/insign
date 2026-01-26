@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { onAuthStateChanged } from '@/lib/firebase/auth';
+import { onAuthStateChanged, signOut as firebaseSignOut } from '@/lib/firebase/auth';
 import { db } from '@/lib/firebase/config';
 import { UserProfile, createUserProfile } from '@/types/user';
 
@@ -11,12 +11,14 @@ interface AuthContextType {
     user: User | null;
     userProfile: UserProfile | null;
     loading: boolean;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
     userProfile: null,
     loading: true,
+    logout: async () => { },
 });
 
 export const useAuth = () => {
@@ -35,6 +37,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const logout = async () => {
+        try {
+            await firebaseSignOut();
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(async (authUser) => {
@@ -80,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, userProfile, loading }}>
+        <AuthContext.Provider value={{ user, userProfile, loading, logout }}>
             {children}
         </AuthContext.Provider>
     );

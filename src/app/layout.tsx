@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
     subsets: ["latin"],
     variable: "--font-sans",
+});
+
+const outfit = Outfit({
+    subsets: ["latin"],
+    variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +28,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="ko" suppressHydrationWarning>
-            <body className={`${inter.variable} antialiased`}>
+            <body className={`${inter.variable} ${outfit.variable} font-sans antialiased`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
@@ -31,6 +37,7 @@ export default function RootLayout({
                 >
                     <AuthProvider>
                         {children}
+                        <Toaster position="top-center" expand />
                     </AuthProvider>
                 </ThemeProvider>
             </body>
