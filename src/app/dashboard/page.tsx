@@ -14,6 +14,8 @@ import { uploadContractFile } from '@/lib/firebase/storage';
 import { AnalysisResult } from '@/types/contract';
 import { toast } from 'sonner';
 
+import { useLanguageStore } from '@/store/useLanguageStore';
+
 // Mock 분석 결과 데이터
 const MOCK_RESULT: AnalysisResult = {
     overallScore: 68,
@@ -59,6 +61,7 @@ const MOCK_RESULT: AnalysisResult = {
 export default function DashboardPage() {
     const { user, userProfile, loading, logout } = useAuth();
     const router = useRouter();
+    const { t } = useLanguageStore();
 
     // UI 상태 관리
     const [view, setView] = useState<'upload' | 'loading' | 'results'>('upload');
@@ -71,7 +74,7 @@ export default function DashboardPage() {
             await signInWithGoogle();
         } catch (error) {
             console.error('로그인 실패:', error);
-            toast.error('로그인에 실패했습니다.');
+            toast.error(t('dashboard.auth.loginError'));
         }
     };
 
@@ -80,7 +83,7 @@ export default function DashboardPage() {
             await signInAnonymously();
         } catch (error) {
             console.error('익명 로그인 실패:', error);
-            toast.error('로그인에 실패했습니다.');
+            toast.error(t('dashboard.auth.loginError'));
         }
     };
 
@@ -107,13 +110,13 @@ export default function DashboardPage() {
                 setTimeout(() => {
                     setAnalysisResult(MOCK_RESULT);
                     setView('results');
-                    toast.success('계약서 분석이 완료되었습니다!');
+                    toast.success(t('dashboard.results.completed'));
                 }, 12000);
             }, 500);
 
         } catch (error) {
             console.error('업로드 실패:', error);
-            toast.error('파일 업로드 중 오류가 발생했습니다.');
+            toast.error(t('dashboard.upload.errorUpload'));
             setUploadProgress(0);
         }
     };
@@ -123,7 +126,7 @@ export default function DashboardPage() {
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-muted-foreground animate-pulse font-medium">분석 환경 준비 중...</p>
+                    <p className="text-muted-foreground animate-pulse font-medium">{t('dashboard.loading.preparing')}</p>
                 </div>
             </div>
         );
@@ -138,10 +141,9 @@ export default function DashboardPage() {
                         <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/30">
                             <FileText className="w-12 h-12 text-primary-foreground" />
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground mb-3 font-outfit">Welcome to InSign</h1>
+                        <h1 className="text-3xl font-bold text-foreground mb-3 font-outfit">{t('dashboard.auth.welcome')}</h1>
                         <p className="text-muted-foreground leading-relaxed">
-                            전문가 수준의 AI 계약서 분석으로
-                            <br />당신의 권리를 지키세요
+                            {t('dashboard.auth.subtitle')}
                         </p>
                     </div>
 
@@ -156,7 +158,7 @@ export default function DashboardPage() {
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                             </svg>
-                            Google로 시작하기
+                            {t('dashboard.auth.googleLogin')}
                         </Button>
 
                         <Button
@@ -164,14 +166,15 @@ export default function DashboardPage() {
                             variant="outline"
                             className="w-full py-7 text-lg rounded-2xl"
                         >
-                            살펴보기 (로그인 없이)
+                            {t('dashboard.auth.anonymousLogin')}
                         </Button>
                     </div>
 
                     <p className="text-xs text-muted-foreground text-center mt-8">
-                        By continuing, you agree to our
-                        <a href="#" className="underline ml-1">Terms of Service</a> &
-                        <a href="#" className="underline ml-1">Privacy Policy</a>
+                        {t('dashboard.auth.footerPrefix')}
+                        <a href="#" className="underline mx-1">{t('dashboard.auth.terms')}</a> &
+                        <a href="#" className="underline ml-1">{t('dashboard.auth.privacy')}</a>
+                        {t('dashboard.auth.footerSuffix')}
                     </p>
                 </Card>
             </div>
@@ -193,23 +196,23 @@ export default function DashboardPage() {
                 <nav className="flex-grow px-4 space-y-2">
                     <Button variant="ghost" className="w-full justify-start gap-3 py-6 text-gray-600 hover:text-primary hover:bg-primary/5 rounded-xl">
                         <LayoutDashboard className="w-5 h-5" />
-                        <span className="font-semibold">대시보드</span>
+                        <span className="font-semibold">{t('dashboard.sidebar.dashboard')}</span>
                     </Button>
                     <Button variant="ghost" className="w-full justify-start gap-3 py-6 text-gray-400 hover:text-primary rounded-xl">
                         <History className="w-5 h-5" />
-                        <span className="font-semibold">최근 분석 내역</span>
+                        <span className="font-semibold">{t('dashboard.sidebar.history')}</span>
                     </Button>
                     <Button variant="ghost" className="w-full justify-start gap-3 py-6 text-gray-400 hover:text-primary rounded-xl">
                         <Settings className="w-5 h-5" />
-                        <span className="font-semibold">설정</span>
+                        <span className="font-semibold">{t('dashboard.sidebar.settings')}</span>
                     </Button>
                 </nav>
 
                 <div className="p-6 border-t border-gray-100">
                     <div className="bg-primary/5 rounded-2xl p-4 mb-4">
-                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">현재 플랜</p>
+                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">{t('dashboard.sidebar.currentPlan')}</p>
                         <p className="text-sm font-bold text-gray-900 mb-3">{userProfile?.membership || 'Free'} Plan</p>
-                        <Button className="w-full text-xs font-bold h-8" variant="default">업그레이드</Button>
+                        <Button className="w-full text-xs font-bold h-8" variant="default">{t('dashboard.sidebar.upgrade')}</Button>
                     </div>
                     <Button
                         variant="ghost"
@@ -217,7 +220,7 @@ export default function DashboardPage() {
                         className="w-full justify-start gap-3 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
                     >
                         <LogOut className="w-5 h-5" />
-                        <span className="font-semibold">로그아웃</span>
+                        <span className="font-semibold">{t('dashboard.sidebar.logout')}</span>
                     </Button>
                 </div>
             </aside>
@@ -226,12 +229,12 @@ export default function DashboardPage() {
             <div className="flex-grow flex flex-col h-screen overflow-y-auto">
                 <header className="h-20 flex items-center justify-between px-8 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
                     <h2 className="text-xl font-bold text-gray-800">
-                        {view === 'upload' ? '새 문서 분석' : view === 'loading' ? '분석 중...' : '분석 결과'}
+                        {view === 'upload' ? t('dashboard.header.newAnalysis') : view === 'loading' ? t('dashboard.header.analyzing') : t('dashboard.header.results')}
                     </h2>
 
                     <div className="flex items-center gap-4">
                         <div className="text-right hidden sm:block">
-                            <p className="text-xs font-medium text-gray-500">Welcome back,</p>
+                            <p className="text-xs font-medium text-gray-500">{t('dashboard.header.welcome')}</p>
                             <p className="text-sm font-bold text-gray-900">{user.displayName || user.email?.split('@')[0]}</p>
                         </div>
                         <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-primary/10">
@@ -250,8 +253,8 @@ export default function DashboardPage() {
                     {view === 'upload' && (
                         <div className="space-y-8">
                             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                                <h2 className="text-3xl font-extrabold text-gray-900 mb-2 font-outfit">새로운 계약서를 분석해보세요</h2>
-                                <p className="text-gray-500 text-lg">AI가 전속계약서의 독소 조항과 법적 위험 요소를 즉시 찾아냅니다.</p>
+                                <h2 className="text-3xl font-extrabold text-gray-900 mb-2 font-outfit">{t('dashboard.upload.title')}</h2>
+                                <p className="text-gray-500 text-lg">{t('dashboard.upload.subtitle')}</p>
                             </div>
 
                             <ContractUpload
@@ -263,9 +266,9 @@ export default function DashboardPage() {
                             {/* Info Section */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
                                 {[
-                                    { title: "보안 유지", desc: "모든 문서는 암호화되어 보호됩니다.", icon: "🔒" },
-                                    { title: "실시간 분석", desc: "수 분 내에 정밀 분석 결과를 제공합니다.", icon: "⚡" },
-                                    { title: "전문가 검토", desc: "검증된 AI 알고리즘을 사용합니다.", icon: "⚖️" }
+                                    { title: t('dashboard.upload.info1Title'), desc: t('dashboard.upload.info1Desc'), icon: "🔒" },
+                                    { title: t('dashboard.upload.info2Title'), desc: t('dashboard.upload.info2Desc'), icon: "⚡" },
+                                    { title: t('dashboard.upload.info3Title'), desc: t('dashboard.upload.info3Desc'), icon: "⚖️" }
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm">
                                         <span className="text-2xl">{item.icon}</span>

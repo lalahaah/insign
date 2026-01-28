@@ -1,13 +1,12 @@
 'use client';
 
-import { AnalysisResult, ToxicClause } from '@/types/contract';
+import { AnalysisResult } from '@/types/contract';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
     AlertTriangle,
     CheckCircle2,
     Info,
-    ArrowRight,
     FileWarning,
     ShieldCheck,
     Zap,
@@ -23,7 +22,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { useLanguageStore } from '@/store/useLanguageStore';
 
 interface ContractResultsProps {
     result: AnalysisResult;
@@ -31,6 +30,7 @@ interface ContractResultsProps {
 }
 
 export function ContractResults({ result, filename }: ContractResultsProps) {
+    const { t } = useLanguageStore();
     const { overallScore, summary, toxicClauses, visaImpact } = result;
 
     const getScoreColor = (score: number) => {
@@ -42,22 +42,22 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
     const getSeverityBadge = (severity: 'high' | 'medium' | 'low') => {
         switch (severity) {
             case 'high':
-                return <Badge variant="destructive" className="bg-red-500/10 text-red-500 border-red-500/20">고위험</Badge>;
+                return <Badge variant="destructive" className="bg-red-500/10 text-red-500 border-red-500/20">{t('dashboard.results.severityHigh')}</Badge>;
             case 'medium':
-                return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">주의</Badge>;
+                return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">{t('dashboard.results.severityMedium')}</Badge>;
             case 'low':
-                return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">보통</Badge>;
+                return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">{t('dashboard.results.severityLow')}</Badge>;
         }
     };
 
     const getVisaStatusBadge = (status: 'safe' | 'warning' | 'danger') => {
         switch (status) {
             case 'safe':
-                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20">안전</Badge>;
+                return <Badge className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20">{t('dashboard.results.visaSafe')}</Badge>;
             case 'warning':
-                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/20">주의 요망</Badge>;
+                return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/20">{t('dashboard.results.visaWarning')}</Badge>;
             case 'danger':
-                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20">위험</Badge>;
+                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20">{t('dashboard.results.visaDanger')}</Badge>;
         }
     };
 
@@ -71,15 +71,15 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold">{filename}</h1>
-                        <p className="text-sm text-muted-foreground">분석 완료 • 2026.01.26</p>
+                        <p className="text-sm text-muted-foreground">{t('dashboard.results.completed')} • 2026.01.26</p>
                     </div>
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" size="sm" className="gap-2">
-                        <Download className="w-4 h-4" /> PDF 저장
+                        <Download className="w-4 h-4" /> {t('dashboard.results.savePDF')}
                     </Button>
                     <Button variant="outline" size="sm" className="gap-2">
-                        <Share2 className="w-4 h-4" /> 공유
+                        <Share2 className="w-4 h-4" /> {t('dashboard.results.share')}
                     </Button>
                 </div>
             </div>
@@ -114,32 +114,32 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                             <span className={`text-4xl font-bold ${getScoreColor(overallScore)}`}>{overallScore}</span>
-                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">신뢰도 점수</span>
+                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('dashboard.results.scoreTitle')}</span>
                         </div>
                     </div>
                     <p className="text-sm text-muted-foreground font-medium">
-                        {overallScore >= 80 ? '비교적 안전한 계약서입니다' : overallScore >= 50 ? '수정이 필요한 조항이 있습니다' : '매우 위험한 조항들이 포함되어 있습니다'}
+                        {overallScore >= 80 ? t('dashboard.results.safeStatus') : overallScore >= 50 ? t('dashboard.results.warningStatus') : t('dashboard.results.dangerStatus')}
                     </p>
                 </Card>
 
                 <Card className="md:col-span-2 p-8 border-primary/10 shadow-xl">
                     <div className="flex items-center gap-2 mb-4 text-primary font-semibold">
                         <Zap className="w-5 h-5" />
-                        <h2>AI 분석 요약</h2>
+                        <h2>{t('dashboard.results.summaryTitle')}</h2>
                     </div>
                     <p className="text-lg leading-relaxed text-foreground">
                         {summary}
                     </p>
                     <div className="mt-8 grid grid-cols-2 gap-4">
                         <div className="p-4 rounded-2xl bg-muted/30 border border-border">
-                            <span className="text-xs text-muted-foreground block mb-1">발견된 독소 조항</span>
-                            <span className="text-xl font-bold text-red-500">{toxicClauses.length}개</span>
+                            <span className="text-xs text-muted-foreground block mb-1">{t('dashboard.results.detectedToxic')}</span>
+                            <span className="text-xl font-bold text-red-500">{toxicClauses.length}</span>
                         </div>
                         <div className="p-4 rounded-2xl bg-muted/30 border border-border text-left">
-                            <span className="text-xs text-muted-foreground block mb-1">비자 영향도</span>
+                            <span className="text-xs text-muted-foreground block mb-1">{t('dashboard.results.visaImpact')}</span>
                             <div className="flex items-center gap-2">
                                 <span className={`text-xl font-bold ${visaImpact.status === 'danger' ? 'text-red-500' : visaImpact.status === 'warning' ? 'text-yellow-500' : 'text-green-500'}`}>
-                                    {visaImpact.status === 'danger' ? '위험' : visaImpact.status === 'warning' ? '주의' : '안전'}
+                                    {visaImpact.status === 'danger' ? t('dashboard.results.visaDanger') : visaImpact.status === 'warning' ? t('dashboard.results.visaWarning') : t('dashboard.results.visaSafe')}
                                 </span>
                                 {getVisaStatusBadge(visaImpact.status)}
                             </div>
@@ -156,7 +156,7 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
                     </div>
                     <div>
                         <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-                            Global Talent 비자 영향 분석
+                            {t('dashboard.results.visaTitle')}
                             {getVisaStatusBadge(visaImpact.status)}
                         </h2>
                         <p className="text-muted-foreground leading-relaxed">
@@ -170,7 +170,7 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
             <div className="space-y-4">
                 <div className="flex items-center gap-2 text-red-500 font-bold text-xl px-2">
                     <FileWarning className="w-6 h-6" />
-                    <h2>발견된 핵심 독소 조항 ({toxicClauses.length})</h2>
+                    <h2>{t('dashboard.results.toxicClausesTitle')} ({toxicClauses.length})</h2>
                 </div>
 
                 <Accordion type="single" collapsible className="w-full space-y-4">
@@ -200,7 +200,7 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
                                     {/* Original Text */}
                                     <div className="p-4 bg-muted/50 rounded-xl border border-border">
                                         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-2">
-                                            <Info className="w-3 h-3" /> 원문 조항
+                                            <Info className="w-3 h-3" /> {t('dashboard.results.originalText')}
                                         </h4>
                                         <p className="text-sm font-mono text-foreground leading-relaxed">
                                             "{clause.original_text}"
@@ -210,7 +210,7 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
                                     {/* AI Explanation */}
                                     <div>
                                         <h4 className="text-sm font-bold mb-2 flex items-center gap-2 text-primary">
-                                            <Zap className="w-4 h-4" /> AI 가이드 (English)
+                                            <Zap className="w-4 h-4" /> {t('dashboard.results.aiGuide')}
                                         </h4>
                                         <p className="text-base text-muted-foreground leading-relaxed">
                                             {clause.explanation_en}
@@ -221,7 +221,7 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
                                     {clause.negotiation_script_ko && (
                                         <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
                                             <h4 className="text-sm font-bold mb-3 flex items-center gap-2 text-primary">
-                                                <MessageSquareText className="w-4 h-4" /> 제안하는 수정안 및 협상 스크립트
+                                                <MessageSquareText className="w-4 h-4" /> {t('dashboard.results.negotiationScript')}
                                             </h4>
                                             <p className="text-foreground italic leading-relaxed">
                                                 "{clause.negotiation_script_ko}"
@@ -233,7 +233,7 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
                                     {clause.standard_reference && (
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                            <span>표준 계약 준수 권고: {clause.standard_reference}</span>
+                                            <span>{t('dashboard.results.standardRecommendation')}: {clause.standard_reference}</span>
                                         </div>
                                     )}
                                 </div>
@@ -246,10 +246,10 @@ export function ContractResults({ result, filename }: ContractResultsProps) {
             {/* Bottom Actions */}
             <div className="pt-8 flex flex-col sm:flex-row gap-4">
                 <Button className="flex-grow py-6 text-lg rounded-xl gap-2 shadow-lg shadow-primary/20">
-                    <Zap className="w-5 h-5" /> 변호사 상담 연결하기
+                    <Zap className="w-5 h-5" /> {t('dashboard.results.consultLawyer')}
                 </Button>
-                <Button variant="outline" className="flex-grow py-6 text-lg rounded-xl">
-                    다른 계약서 분석하기
+                <Button variant="outline" className="flex-grow py-6 text-lg rounded-xl" onClick={() => window.location.reload()}>
+                    {t('dashboard.results.analyzeMore')}
                 </Button>
             </div>
         </div>

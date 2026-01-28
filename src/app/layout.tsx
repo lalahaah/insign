@@ -21,6 +21,8 @@ export const metadata: Metadata = {
     keywords: ["contract", "analysis", "AI", "legal-tech", "korea"],
 };
 
+import { ScrollToTop } from "@/components/scroll-to-top";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -37,6 +39,7 @@ export default function RootLayout({
                 >
                     <AuthProvider>
                         {children}
+                        <ScrollToTop />
                         <Toaster position="top-center" expand />
                     </AuthProvider>
                 </ThemeProvider>

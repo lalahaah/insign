@@ -7,6 +7,8 @@ import { Upload, FileText, X, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
+import { useLanguageStore } from '@/store/useLanguageStore';
+
 interface ContractUploadProps {
     onUploadStarted: (file: File) => void;
     isUploading: boolean;
@@ -14,6 +16,7 @@ interface ContractUploadProps {
 }
 
 export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }: ContractUploadProps) {
+    const { t } = useLanguageStore();
     const [isDragging, setIsDragging] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,13 +50,13 @@ export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }:
         // 파일 형식 검사
         const validTypes = ['application/pdf', 'image/jpeg', 'image/png'];
         if (!validTypes.includes(file.type)) {
-            toast.error('지원하지 않는 파일 형식입니다. PDF, JPG, PNG 파일만 업로드 가능합니다.');
+            toast.error(t('dashboard.upload.errorType'));
             return;
         }
 
         // 파일 크기 검사 (10MB)
         if (file.size > 10 * 1024 * 1024) {
-            toast.error('파일 크기가 너무 큽니다. 최대 10MB까지 업로드 가능합니다.');
+            toast.error(t('dashboard.upload.errorSize'));
             return;
         }
 
@@ -74,10 +77,9 @@ export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }:
     };
 
     return (
-        <Card 
-            className={`relative overflow-hidden border-2 border-dashed transition-all duration-300 ${
-                isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-primary/20 bg-card hover:border-primary/40'
-            }`}
+        <Card
+            className={`relative overflow-hidden border-2 border-dashed transition-all duration-300 ${isDragging ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-primary/20 bg-card hover:border-primary/40'
+                }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -89,12 +91,12 @@ export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }:
                             <Upload className="w-10 h-10 text-primary" />
                         </div>
                         <h2 className="text-2xl font-bold text-foreground mb-3">
-                            계약서 업로드
+                            {t('dashboard.header.newAnalysis')}
                         </h2>
                         <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                            분석하고 싶은 계약서를 드래그 앤 드롭하거나 아래 버튼을 클릭하여 선택하세요.
+                            {t('dashboard.upload.dropzone')}
                             <br />
-                            <span className="text-xs opacity-70">(PDF, JPG, PNG 최대 10MB)</span>
+                            <span className="text-xs opacity-70">{t('dashboard.upload.limit')}</span>
                         </p>
                         <input
                             type="file"
@@ -103,12 +105,12 @@ export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }:
                             onChange={handleFileSelect}
                             accept=".pdf, .jpg, .jpeg, .png"
                         />
-                        <Button 
-                            size="lg" 
+                        <Button
+                            size="lg"
                             className="bg-primary hover:opacity-90 shadow-lg shadow-primary/20 px-8 py-6 text-lg rounded-xl"
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            파일 선택하기
+                            {t('dashboard.upload.selectFile')}
                         </Button>
                     </>
                 ) : isUploading ? (
@@ -116,7 +118,7 @@ export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }:
                         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6 animate-pulse">
                             <FileText className="w-8 h-8 text-primary" />
                         </div>
-                        <h3 className="text-xl font-bold mb-2">파일 업로드 중...</h3>
+                        <h3 className="text-xl font-bold mb-2">{t('dashboard.upload.uploading')}</h3>
                         <p className="text-muted-foreground mb-6 text-sm">{selectedFile?.name}</p>
                         <div className="space-y-2">
                             <Progress value={uploadProgress} className="h-2" />
@@ -127,7 +129,7 @@ export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }:
                     <div className="w-full max-w-md animate-in slide-in-from-bottom-4 duration-500">
                         <div className="relative w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
                             <FileText className="w-10 h-10 text-primary" />
-                            <button 
+                            <button
                                 onClick={removeFile}
                                 className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:scale-110 transition-transform shadow-md"
                             >
@@ -136,23 +138,23 @@ export function ContractUpload({ onUploadStarted, isUploading, uploadProgress }:
                         </div>
                         <h3 className="text-xl font-bold mb-1 truncate px-4">{selectedFile?.name}</h3>
                         <p className="text-muted-foreground mb-8 text-sm">
-                            {(selectedFile!.size / (1024 * 1024)).toFixed(2)} MB • Ready for analysis
+                            {(selectedFile!.size / (1024 * 1024)).toFixed(2)} MB • {t('dashboard.upload.ready')}
                         </p>
-                        
+
                         <div className="flex flex-col gap-3">
-                            <Button 
-                                size="lg" 
+                            <Button
+                                size="lg"
                                 className="w-full bg-primary hover:opacity-90 shadow-lg shadow-primary/20 text-lg py-6 rounded-xl"
                                 onClick={handleStartAnalysis}
                             >
-                                AI 분석 시작하기
+                                {t('dashboard.upload.startAnalysis')}
                             </Button>
-                            <Button 
-                                variant="ghost" 
+                            <Button
+                                variant="ghost"
                                 className="text-muted-foreground hover:text-foreground"
                                 onClick={removeFile}
                             >
-                                다른 파일 선택
+                                {t('dashboard.upload.changeFile')}
                             </Button>
                         </div>
                     </div>
